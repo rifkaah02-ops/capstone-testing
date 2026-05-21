@@ -38,7 +38,7 @@ from sqlalchemy.orm import (
 # CONFIG
 # =====================================================
 
-MODEL_PATH = "/Users/rifkaah/Downloads/22 Mei Model/eye_model_22mei.keras"
+MODEL_PATH = "eye_model_22mei.keras"
 
 IMG_SIZE = 96
 
@@ -123,13 +123,16 @@ print("Model loaded")
 # GENERATIVE AI
 # =====================================================
 
-API_KEY = ""
+API_KEY = os.getenv("GEMINI_API_KEY")
 
-genai.configure(api_key=API_KEY)
+if API_KEY:
+    genai.configure(api_key=API_KEY)
 
-client = genai.GenerativeModel(
-    "gemini-flash-latest"
-)
+    client = genai.GenerativeModel(
+        "gemini-flash-latest"
+    )
+else:
+    client = None
 
 # =====================================================
 # FASTAPI
@@ -165,20 +168,16 @@ app.add_middleware(
 class PredictionResponse(BaseModel):
 
     id:str
-
     filename:str
-
     prediction:str
-
     confidence:float
-
     open_probability:float
-
     closed_probability:float
-
     eye_detected:bool
-
     created_at:datetime
+
+    class Config:
+        from_attributes=True
 
 
 class PredictionWithAdvice(
@@ -316,6 +315,19 @@ def run_prediction(
 
 
 def generate_advice(prediction, confidence):
+
+    if client is None:
+
+        if prediction == "Closed":
+            return (
+                "Mata terdeteksi tertutup. "
+                "Disarankan beristirahat."
+            )
+
+        return (
+            "Mata terdeteksi terbuka. "
+            "Tetap fokus dan jaga kondisi tubuh."
+        )
 
     try:
 
@@ -517,13 +529,17 @@ async def predict_with_advice(
         
         advice=f"AI Error: {str(e)}"
 
-    return{
-
-        **base.__dict__,
-
-        "ai_advice":
-        advice
-    }
+    return {
+    "id": base.id,
+    "filename": base.filename,
+    "prediction": base.prediction,
+    "confidence": base.confidence,
+    "open_probability": base.open_probability,
+    "closed_probability": base.closed_probability,
+    "eye_detected": base.eye_detected,
+    "created_at": base.created_at,
+    "ai_advice": advice
+}
 
 
 @app.get(
