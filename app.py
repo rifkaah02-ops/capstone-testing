@@ -123,7 +123,7 @@ print("Model loaded")
 # GENERATIVE AI
 # =====================================================
 
-API_KEY = "AIzaSyDo888VMqzA9decMQ4Z0OauiyMgUuT5c58"
+API_KEY = ""
 
 genai.configure(api_key=API_KEY)
 
