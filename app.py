@@ -316,7 +316,12 @@ def run_prediction(
 
 def generate_advice(prediction, confidence):
 
+    # cek client kebentuk atau engga
+    print("CLIENT:", client)
+
     if client is None:
+
+        print("USING FALLBACK: client None")
 
         if prediction == "Closed":
             return (
@@ -330,6 +335,8 @@ def generate_advice(prediction, confidence):
         )
 
     try:
+
+        print("USING GEMINI")
 
         prompt = f"""
         Status mata: {prediction}
@@ -350,24 +357,15 @@ def generate_advice(prediction, confidence):
             prompt
         )
 
+        print("GEMINI RESPONSE:", response.text)
+
         return response.text
 
     except Exception as e:
 
-        print("Gemini Error:", e)
+        print("GEMINI ERROR:", str(e))
 
-        if prediction == "Closed":
-
-            return (
-                "Mata terdeteksi tertutup. "
-                "Disarankan untuk beristirahat "
-                "atau berhenti berkendara sementara."
-            )
-
-        return (
-            "Mata terdeteksi terbuka. "
-            "Tetap fokus dan jaga kondisi tubuh."
-        )
+        return f"Gemini Error: {str(e)}"
         
 def save_prediction(
     db:Session,
