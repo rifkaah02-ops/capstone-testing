@@ -38,7 +38,7 @@ from sqlalchemy.orm import (
 # CONFIG
 # =====================================================
 
-MODEL_PATH = "eye_model_22mei.keras"
+MODEL_PATH = "eye_model_22mei_baru.keras"
 
 IMG_SIZE = 96
 
